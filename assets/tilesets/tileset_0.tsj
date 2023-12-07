@@ -1,0 +1,14 @@
+{ "columns":10,
+ "image":"generation_simple.png",
+ "imageheight":16,
+ "imagewidth":160,
+ "margin":0,
+ "name":"tileset_0",
+ "spacing":0,
+ "tilecount":10,
+ "tiledversion":"1.10.2",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

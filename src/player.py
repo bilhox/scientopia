@@ -1,11 +1,13 @@
 import pygame
+import math
+
 from camera import Camera
 
 class Player:
 
     def __init__(self):
 
-        self.hitbox = pygame.FRect(0, 0, 16, 8)
+        self.hitbox = pygame.FRect(0, 0, 12, 8)
         self.z_height = 24
 
         self.image = pygame.Surface([16, self.z_height])
@@ -14,7 +16,7 @@ class Player:
         self.velocity = pygame.Vector2()
     
         self.speed = 100
-        self.friction = 0.3
+        self.easing_timer = 0
 
         self.keys = {"left":False, "right":False, "up":False, "down":False}
         self.collision_side = {"left":False, "right":False, "top":False, "bottom":False}
@@ -38,9 +40,11 @@ class Player:
             direction.normalize_ip()
         
         if not direction:
-            self.velocity *= self.friction
+            self.easing_timer = max(self.easing_timer - dt, 0)
+        else:
+            self.easing_timer = min(self.easing_timer + dt, 0.5)
         
-        self.velocity = direction * self.speed * dt
+        self.velocity = direction * self.speed * dt * (math.sin((self.easing_timer/0.5 * math.pi) / 2))
     
     def is_able_to_jump(self):
         return not self.jumping and (self.y_timer <= 0)
@@ -96,5 +100,5 @@ class Player:
 
     def draw(self, camera : Camera):
 
-        pos = pygame.Vector2(self.hitbox.x, self.hitbox.bottom - self.z_height) - pygame.Vector2(camera.rect.topleft)
-        camera.draw([(self.image, pos)])
+        pos = pygame.Vector2(self.hitbox.centerx - self.image.get_width() / 2, self.hitbox.bottom - self.z_height) - pygame.Vector2(camera.rect.topleft)
+        camera.draw([(self.image, round(pos))])
