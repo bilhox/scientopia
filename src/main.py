@@ -1,4 +1,6 @@
 import pygame
+import os
+
 from tilemap import Tilemap
 from player import Player
 from camera import Camera
@@ -15,15 +17,7 @@ def main():
 
     # Game map
     game_map = Tilemap()
-    game_map.load_tileset("./assets/tilesets/tileset_0.tsj")
-
-    game_map.add_threshold(0, 2)
-    game_map.add_threshold(0.25, 7)
-    game_map.add_threshold(0.3, 1)
-    game_map.add_threshold(0.45, 0)
-    game_map.add_threshold(0.7, 1)
-
-    game_map.generate(pygame.Vector2(100, 100))
+    game_map.load("../assets/tilemap/map_0.tmj")
 
     # Player definition
     player = Player()

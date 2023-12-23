@@ -62,37 +62,48 @@ class Tilemap():
         
         self.tileset.extend(tile_list)
 
-    def generate(self, size : pygame.Vector2) -> None:
-        """
-        Generates the map, the size must be a vector of 2 integer values
-        """
+    def load(self, path : str) -> None:
 
+        path_obj = pathlib.Path(path)
 
-        self.n_size = size.copy()
-        self.tile_size = pygame.Vector2(16, 16)
-        self.size = pygame .Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
+        if not os.path.exists(path_obj):
+            raise FileNotFoundError(f"The Tiled map file  \'{path_obj.as_posix()}\' does not exist.")
+        if path_obj.suffix != "":
+            ...
 
-        a = perlin_noise.PerlinNoise(octaves=8)
+        with open(path_obj) as reader:
 
-        map_sample = [[round(a([i/size.x, j/size.y]), 1)+0.5 for i in range(int(size.x))] for j in range(int(size.y))]
-        
+            json_obj = json.load(reader)
 
-        final_map = []
-        thresholds = list(self.thresholds.items())
+            self.n_size = pygame.Vector2(json_obj["width"], json_obj["height"])            
+            self.tile_size = pygame.Vector2(json_obj["tilewidth"], json_obj["tileheight"])
+            self.size = self.n_size.elementwise() * self.tile_size
 
-        for j in range(len(map_sample)):
-            for i in range(len(map_sample[j])):
+            self.tileset = []
 
-                index = 0
-                for k in range(len(thresholds) - 1):
-                    if thresholds[k][0] <= map_sample[j][i] <= thresholds[k + 1][0]:
-                        index = thresholds[k][1]
-                        break
-
-                tile = self.tileset[index], pygame.Vector2(i, j).elementwise() * self.tile_size
-                final_map.append(tile)
-
-        self.layers["foreground"] = final_map
+            for tileset in json_obj['tilesets']:
+                self.load_tileset(path_obj.parent.joinpath(tileset["source"]))
+            
+            
+            for layer in json_obj["layers"]:
+                if layer["type"] == "tilelayer":
+                    layer_data = layer["data"]
+                    final_layer_data = []
+                    for y in range(layer["height"]):
+                        for x in range(layer["width"]):
+                            tile_value = layer_data[y * layer["width"] + x % layer["width"]] - 1
+                            if tile_value != 0:
+                                final_layer_data.append((self.tileset[tile_value], pygame.Vector2(x, y).elementwise() * self.tile_size))
+                    
+                    self.layers[layer["name"]] = final_layer_data
+                
+                elif layer["type"] == "objectgroup":
+                    objects = []
+                    for obj in layer["objects"]:
+                        rect = pygame.FRect(obj["x"], obj["y"], obj["width"], obj["height"])
+                        objects.append(rect)
+                    
+                    self.object_layers[layer["name"]] = objects
 
 
     def draw(self, camera : Camera) -> None:
