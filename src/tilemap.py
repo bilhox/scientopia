@@ -72,20 +72,30 @@ class Tilemap():
         self.tile_size = pygame.Vector2(16, 16)
         self.size = pygame .Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
 
-        a = perlin_noise.PerlinNoise(octaves=8)
+        a = perlin_noise.PerlinNoise(octaves=4)
+        b = perlin_noise.PerlinNoise(octaves=8)
 
-        map_sample = [[round(a([i/size.x, j/size.y]), 1)+0.5 for i in range(int(size.x))] for j in range(int(size.y))]
+        map_samples = []
+
+        for j in range(int(size.y)):
+            line = []
+            for i in range(int(size.x)):
+                val = a([i/size.x, j/size.y]) * 0.5
+                val += b([i/size.x, j/size.y]) * 0.25
+                line.append(val + 0.325)
+            
+            map_samples.append(line)
         
 
         final_map = []
         thresholds = list(self.thresholds.items())
 
-        for j in range(len(map_sample)):
-            for i in range(len(map_sample[j])):
+        for j in range(len(map_samples)):
+            for i in range(len(map_samples[j])):
 
                 index = 0
                 for k in range(len(thresholds) - 1):
-                    if thresholds[k][0] <= map_sample[j][i] <= thresholds[k + 1][0]:
+                    if thresholds[k][0] <= map_samples[j][i] <= thresholds[k + 1][0]:
                         index = thresholds[k][1]
                         break
 
