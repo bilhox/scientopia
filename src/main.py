@@ -17,7 +17,7 @@ def main():
 
     # Game map
     game_map = Tilemap()
-    game_map.load("../assets/tilemap/map_0.tmj")
+    game_map.load("./assets/tilemap/map_0.tmj")
 
     # Player definition
     player = Player()
@@ -43,7 +43,7 @@ def main():
         camera.clear()
 
         player.update(dt)
-        player.collisions([])
+        player.collisions(game_map.object_layers["colliders"])
 
         camera.rect.x += (player.hitbox.centerx - camera.rect.centerx) * 3 * dt
         camera.rect.y += (player.hitbox.centery - camera.rect.centery) * 3 * dt
