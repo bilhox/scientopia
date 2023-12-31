@@ -33,7 +33,6 @@ def main():
 
     for j in range(int(camera.rect.h)):
         for i in range(int(camera.rect.w)):
-            print(255 * (noise_values[i, j] + 0.5))
             pix_color = [255 * (noise_values[i, j] + 0.5)] * 3
             pixels[i, j] = pix_color
     
