@@ -94,11 +94,7 @@ class CheckBoxParameter(pygame_gui.core.UIContainer):
                                                     text=self.name)
 
 
-        self.ui_value = pygame_gui.elements.UILabel(pygame.Rect(-self.rect.w / 4, 0, self.rect.w / 4, self.rect.h),
-                                                    manager=manager,
-                                                    container=self,
-                                                    text=self.value,
-                                                    anchors={"right":"right"})
+        self.ui_value = pygame_gui.elements.UI
     
     def set_name(self, name : str):
         self.ui_label.set_text(name)

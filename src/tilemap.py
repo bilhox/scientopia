@@ -72,17 +72,17 @@ class Tilemap():
         self.tile_size = pygame.Vector2(16, 16)
         self.size = pygame .Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
 
-        a = perlin_noise.PerlinNoise(octaves=4)
-        b = perlin_noise.PerlinNoise(octaves=8)
+        a = perlin_noise.PerlinNoise(octaves=2)
+        b = perlin_noise.PerlinNoise(octaves=4)
 
         map_samples = []
 
         for j in range(int(size.y)):
             line = []
             for i in range(int(size.x)):
-                val = a([i/size.x, j/size.y]) * 0.5
-                val += b([i/size.x, j/size.y]) * 0.25
-                line.append(val + 0.325)
+                val = abs(a([i/size.x, j/size.y]))
+                val += abs(b([i/size.x, j/size.y])) * 0.5
+                line.append(val)
             
             map_samples.append(line)
         

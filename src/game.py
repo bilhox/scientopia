@@ -20,14 +20,11 @@ class Game(scene.Scene):
         self.game_map.load_tileset("./assets/tilesets/tileset_0.tsj")
 
         self.game_map.add_threshold(0, 2)
-        self.game_map.add_threshold(0.25, 7)
-        self.game_map.add_threshold(0.3, 1)
-        self.game_map.add_threshold(0.45, 0)
-        self.game_map.add_threshold(0.7, 1)
+        self.game_map.add_threshold(0.15, 1)
 
-        self.game_map.generate(pygame.Vector2(100, 100))
+        self.game_map.generate(pygame.Vector2(75, 75))
 
-        self.player.hitbox.topleft = pygame.Vector2(128, 128)
+        self.player.hitbox.topleft = pygame.Vector2(64, 64)
 
         # Working on
         # player_dest_surface = pygame.Surface([16, 16], pygame.SRCALPHA)
