@@ -3,6 +3,13 @@ import pygame_gui
 import perlin_noise
 import time
 
+from perlin_numpy import (
+    generate_fractal_noise_2d, generate_fractal_noise_3d,
+    generate_perlin_noise_2d, generate_perlin_noise_3d
+)
+
+import perlin_numpy
+
 from parameter import *
 
 
@@ -18,11 +25,12 @@ def generate_texture(settings : dict) -> pygame.Surface:
     surf = pygame.Surface([size]*2)
     pixels = pygame.surfarray.pixels3d(surf)
 
+    noise_values = generate_perlin_noise_2d([size, size], [settings["octave"].range_value]*2)
+
     for j in range(size):
         for i in range(size):
-            noise_value = abs(noise1([(offset[0] + i)/size, (offset[1] + j)/size]))
-            color = [100]*3 if noise_value <= settings["threshold"].range_value else [210]*3
-            pixels[i, j] = color
+            noise_value = noise_values[i, j]
+            pixels[i, j] = [pygame.math.clamp(noise_value * 510, 0, 255)] * 3
 
     del pixels
 
@@ -46,7 +54,7 @@ clock = pygame.Clock()
 settings = {
     "seed":{"type":"detail", "text":f"{noise1.seed}"},
     "generation dur.":{"type":"detail", "text":""},
-    "size":{"range":[16, 256], "default":128, "type":"ranged value"},
+    "size":{"range":[16, 256], "default":256, "type":"ranged value"},
     "octave":{"range":[1, 32], "default":2, "type":"ranged value"},
     "offsetx":{"range":[-200, 200], "default":0, "type":"ranged value"},
     "offsety":{"range":[-200, 200], "default":0, "type":"ranged value"},
