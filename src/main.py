@@ -1,5 +1,7 @@
 import pygame
 import os
+import perlin_numpy
+import numpy
 
 from tilemap import Tilemap
 from player import Player
@@ -22,6 +24,20 @@ def main():
     # Player definition
     player = Player()
     player.hitbox.topleft = pygame.Vector2(128, 128)
+
+    numpy.random.seed(0)
+    noise_values = perlin_numpy.generate_perlin_noise_2d([int(camera.rect.w), int(camera.rect.h)], (4, 4))
+
+    surf_filter = pygame.Surface([int(camera.rect.w), int(camera.rect.h)], pygame.SRCALPHA)
+    pixels = pygame.surfarray.pixels3d(surf_filter)
+
+    for j in range(int(camera.rect.h)):
+        for i in range(int(camera.rect.w)):
+            print(255 * (noise_values[i, j] + 0.5))
+            pix_color = [255 * (noise_values[i, j] + 0.5)] * 3
+            pixels[i, j] = pix_color
+    
+    del pixels
 
     # Working on
     # player_dest_surface = pygame.Surface([16, 16], pygame.SRCALPHA)
@@ -54,6 +70,8 @@ def main():
         game_map.draw(camera)
         # camera.draw([(player_dest_surface, player_dest * 16 - pygame.Vector2(camera.rect.topleft))])
         player.draw(camera)
+
+        camera.draw([(surf_filter, pygame.Vector2(0, 0))])
 
         camera.display_on_screen(screen)
 
