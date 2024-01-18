@@ -20,7 +20,9 @@ class Game(scene.Scene):
         self.game_map.load_tileset("./assets/tilesets/tileset_0.tsj")
 
         self.game_map.add_threshold(0, 2)
-        self.game_map.add_threshold(0.15, 1)
+        self.game_map.add_threshold(0.15, 7)
+        self.game_map.add_threshold(0.3, 0)
+        self.game_map.add_threshold(0.5, 1)
 
         self.game_map.generate(pygame.Vector2(75, 75))
 

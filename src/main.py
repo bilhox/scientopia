@@ -1,7 +1,4 @@
 import pygame
-from tilemap import Tilemap
-from player import Player
-from camera import Camera
 
 from scene import SceneManager
 from game import Game

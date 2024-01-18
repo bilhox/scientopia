@@ -1,11 +1,8 @@
 import pygame
 import json
 import pathlib
-import os
-
-import perlin_noise
-import noise
-import math
+import opensimplex
+import numpy
 
 from camera import Camera
 
@@ -70,32 +67,20 @@ class Tilemap():
 
         self.n_size = size.copy()
         self.tile_size = pygame.Vector2(16, 16)
-        self.size = pygame .Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
-
-        a = perlin_noise.PerlinNoise(octaves=2)
-        b = perlin_noise.PerlinNoise(octaves=4)
-
-        map_samples = []
-
-        for j in range(int(size.y)):
-            line = []
-            for i in range(int(size.x)):
-                val = abs(a([i/size.x, j/size.y]))
-                val += abs(b([i/size.x, j/size.y])) * 0.5
-                line.append(val)
-            
-            map_samples.append(line)
+        self.size = pygame.Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
+        a = opensimplex.OpenSimplex(0)
+        map_samples = a.noise2array(numpy.array([2*i/size.x for i in range(int(size.x))]), numpy.array([2*i/size.x for i in range(int(size.y))]))
         
 
         final_map = []
         thresholds = list(self.thresholds.items())
 
-        for j in range(len(map_samples)):
-            for i in range(len(map_samples[j])):
+        for j in range(int(size.y)):
+            for i in range(int(size.x)):
 
                 index = 0
                 for k in range(len(thresholds) - 1):
-                    if thresholds[k][0] <= map_samples[j][i] <= thresholds[k + 1][0]:
+                    if thresholds[k][0] <= abs(map_samples[i, j]) <= thresholds[k + 1][0]:
                         index = thresholds[k][1]
                         break
 

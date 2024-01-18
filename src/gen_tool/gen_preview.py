@@ -1,19 +1,13 @@
 import pygame
 import pygame_gui
-import perlin_noise
+import opensimplex
 import time
-
-from perlin_numpy import (
-    generate_fractal_noise_2d, generate_fractal_noise_3d,
-    generate_perlin_noise_2d, generate_perlin_noise_3d
-)
-
-import perlin_numpy
+import numpy
 
 from parameter import *
 
 
-noise1 = perlin_noise.PerlinNoise(2)
+noise1 = opensimplex.OpenSimplex(0)
 
 def generate_texture(settings : dict) -> pygame.Surface:
 
@@ -25,12 +19,12 @@ def generate_texture(settings : dict) -> pygame.Surface:
     surf = pygame.Surface([size]*2)
     pixels = pygame.surfarray.pixels3d(surf)
 
-    noise_values = generate_perlin_noise_2d([size, size], [settings["octave"].range_value]*2)
+    noise_values1 = noise1.noise2array(numpy.array([3*i/size for i in range(size)]), numpy.array([3*i/size for i in range(size)]))
 
     for j in range(size):
         for i in range(size):
-            noise_value = noise_values[i, j]
-            pixels[i, j] = [pygame.math.clamp(noise_value * 510, 0, 255)] * 3
+            noise_value = noise_values1[i, j]
+            pixels[i, j] = [pygame.math.clamp(abs(noise_value) * 255, 0, 255)] * 3
 
     del pixels
 
@@ -52,7 +46,7 @@ is_running = True
 clock = pygame.Clock()
 
 settings = {
-    "seed":{"type":"detail", "text":f"{noise1.seed}"},
+    "seed":{"type":"detail", "text":f"{noise1.get_seed()}"},
     "generation dur.":{"type":"detail", "text":""},
     "size":{"range":[16, 256], "default":256, "type":"ranged value"},
     "octave":{"range":[1, 32], "default":2, "type":"ranged value"},
