@@ -3,6 +3,8 @@ import json
 import pathlib
 import opensimplex
 import numpy
+import random
+import math
 
 from camera import Camera
 
@@ -23,6 +25,9 @@ class Tilemap():
         self.object_layers : dict[str, list] = {}
 
         self.thresholds = {0:0, 1:None}
+        self.patterns = {}
+        self.value_based_tiles = []
+        self.abc = 1 # Pas trouvé de nom
     
     def add_threshold(self, threshold, tile_index) -> None:
         """
@@ -38,6 +43,33 @@ class Tilemap():
         
         self.thresholds[threshold] = tile_index
         self.thresholds = {val:self.thresholds[val] for val in sorted(self.thresholds)}
+
+    def _find_similar_pattern(self, pattern : tuple[int]) -> tuple[int]:
+        for p in self.patterns:
+            s = []
+            for i, v in enumerate(pattern):
+                if (v == p[i] or p[i] == 0):
+                    s.append(p[i])
+            
+            if len(s) == 8:
+                return tuple(s)
+        
+        return None
+                    
+    
+    def get_pattern(self, pattern : tuple[int], original_value : int) -> list[int]:
+
+        index = self.patterns.get(pattern, None)
+        
+        if index != None:
+            return index
+        
+        p = self._find_similar_pattern(pattern)
+            
+        if p == None:
+            return self.patterns[tuple(original_value for _ in range(8))]
+        else:
+            return self.patterns[p]
 
     def load_tileset(self, path) -> None:
         
@@ -56,10 +88,65 @@ class Tilemap():
                 for x in range(json_obj["columns"]):
                     
                     tile_list.append(image.subsurface(pygame.Rect([x*tile_width, y*tile_height], [tile_width, tile_height])))
+            
+            if not "wangsets" in json_obj:
+                self.tileset.extend(tile_list)
+                return
+            
+            for wangset in json_obj["wangsets"]:
+                for pattern in wangset["wangtiles"]:
+                    p = tuple(pattern["wangid"])
+                    if not p in self.patterns:
+                        self.patterns[p] = [pattern["tileid"]]
+                    else:
+                        self.patterns[p].append(pattern["tileid"])
         
         self.tileset.extend(tile_list)
 
-    def generate(self, size : pygame.Vector2) -> None:
+    def build_layer(self, map_samples : numpy.ndarray):
+
+        m_datas = []
+        thresholds = list(self.thresholds.items())
+
+        final_map = []
+
+        for j in range(int(self.n_size.y + 2)):
+            l = []
+            for i in range(int(self.n_size.x + 2)):
+
+                index = 0
+                for k in range(len(thresholds) - 1):
+                    if thresholds[k][0] <= abs(map_samples[j, i]) <= thresholds[k + 1][0]:
+                        index = thresholds[k][1]
+                        break
+
+                # tile = self.tileset[index], pygame.Vector2(i, j).elementwise() * self.tile_size
+                l.append(index)
+            m_datas.append(l)
+
+        for j in range(1, int(self.n_size.y + 2) - 1):
+            for i in range(1, int(self.n_size.x + 2) - 1):
+                if m_datas[j][i] in self.value_based_tiles:
+                    indexs = self.get_pattern(tuple(m_datas[j][i] for _ in range(8)), m_datas[j][i])
+                else:
+                    pattern = (
+                        m_datas[j - 1][i],
+                        m_datas[j - 1][i + 1],
+                        m_datas[j][i + 1],
+                        m_datas[j + 1][i + 1],
+                        m_datas[j + 1][i],
+                        m_datas[j + 1][i - 1],
+                        m_datas[j][i - 1],
+                        m_datas[j - 1][i - 1]
+                    )
+                    indexs = self.get_pattern(pattern, m_datas[j][i])
+                index = random.choice(indexs)
+                tile = self.tileset[index], pygame.Vector2(i-1, j-1).elementwise() * self.tile_size
+                final_map.append(tile)
+    
+        return final_map
+
+    def generate(self, size : pygame.Vector2, seed = 0) -> None:
         """
         Generates the map, the size must be a vector of 2 integer values
         """
@@ -68,24 +155,30 @@ class Tilemap():
         self.n_size = size.copy()
         self.tile_size = pygame.Vector2(16, 16)
         self.size = pygame.Vector2(self.n_size.x*self.tile_size.x, self.n_size.y*self.tile_size.y)
-        a = opensimplex.OpenSimplex(0)
-        map_samples = a.noise2array(numpy.array([2*i/size.x for i in range(int(size.x))]), numpy.array([2*i/size.x for i in range(int(size.y))]))
+
+        a = opensimplex.OpenSimplex(seed)
+        ms_size = int(size.x + 2), int(size.y + 2)
+        map_samples = a.noise2array(numpy.array([3.5*i/ms_size[0] for i in range(ms_size[0])]), numpy.array([3.5*i/ms_size[1] for i in range(ms_size[1])]))
         
-
-        final_map = []
         thresholds = list(self.thresholds.items())
+        final_map = []
 
-        for j in range(int(size.y)):
-            for i in range(int(size.x)):
+        if self.patterns:
+            final_map = self.build_layer(map_samples)
+        else:
 
-                index = 0
-                for k in range(len(thresholds) - 1):
-                    if thresholds[k][0] <= abs(map_samples[i, j]) <= thresholds[k + 1][0]:
-                        index = thresholds[k][1]
-                        break
+            for j in range(1, int(size.y + 2) - 1):
+                for i in range(1, int(size.x + 2) - 1):
 
-                tile = self.tileset[index], pygame.Vector2(i, j).elementwise() * self.tile_size
-                final_map.append(tile)
+                    index = 0
+                    for k in range(len(thresholds) - 1):
+                        if thresholds[k][0] <= abs(map_samples[j, i]) <= thresholds[k + 1][0]:
+                            index = thresholds[k][1]
+                            break
+
+                    tile = self.tileset[index], pygame.Vector2(i-1, j-1).elementwise() * self.tile_size
+                    final_map.append(tile)
+
 
         self.layers["foreground"] = final_map
 
