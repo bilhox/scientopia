@@ -27,7 +27,6 @@ class Tilemap():
         self.thresholds = {0:0, 1:None}
         self.patterns = {}
         self.value_based_tiles = []
-        self.abc = 1 # Pas trouvé de nom
     
     def add_threshold(self, threshold, tile_index) -> None:
         """
