@@ -8,6 +8,28 @@ import math
 
 from camera import Camera
 
+def pixelate(array : numpy.ndarray, pixel_size : int):
+    if array.shape[0] % pixel_size != 0 and array.shape[1] % pixel_size != 0:
+        raise ValueError(f"Failed to pixelate map samples :\n\tArray shape : {array.shape}")
+    
+    temp_samples = []
+    print(array.shape)
+
+    for j in range(0, array.shape[1], pixel_size):
+        line = []
+        for i in range(0, array.shape[0], pixel_size):
+            xsum = 0
+            for k in range(pixel_size):
+                for l in range(pixel_size):
+                    xsum += array[j + k, i + k]
+            line.append(xsum / (pixel_size ** 2))
+        temp_samples.append(line)
+    
+    for j in range(array.shape[1]):
+        for i in range(array.shape[0]):
+            pos = (i // pixel_size, j // pixel_size)
+            array[j, i] = temp_samples[pos[1]][pos[0]]
+
 class Tilemap():
 
     def __init__(self):
@@ -27,6 +49,7 @@ class Tilemap():
         self.thresholds = {0:0, 1:None}
         self.patterns = {}
         self.value_based_tiles = []
+        self.abc = 1 # Pas trouvé de nom
     
     def add_threshold(self, threshold, tile_index) -> None:
         """
@@ -158,6 +181,8 @@ class Tilemap():
         a = opensimplex.OpenSimplex(seed)
         ms_size = int(size.x + 2), int(size.y + 2)
         map_samples = a.noise2array(numpy.array([3.5*i/ms_size[0] for i in range(ms_size[0])]), numpy.array([3.5*i/ms_size[1] for i in range(ms_size[1])]))
+        if self.abc > 1:
+            pixelate(map_samples, self.abc)
         
         thresholds = list(self.thresholds.items())
         final_map = []

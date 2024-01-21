@@ -28,13 +28,15 @@ class Game(scene.Scene):
         self.game_map.add_threshold(0, 5)
         self.game_map.add_threshold(0.2, 1)
         self.game_map.add_threshold(0.35, 4)
+        self.game_map.abc = 2
 
         self.debug_map.add_threshold(0, 2)
         self.debug_map.add_threshold(0.2, 0)
         self.debug_map.add_threshold(0.35, 1)
+        self.debug_map.abc = 2
 
-        self.game_map.generate(pygame.Vector2(62, 62), 1)
-        self.debug_map.generate(pygame.Vector2(62, 62), 1)
+        self.game_map.generate(pygame.Vector2(124, 124), 1)
+        self.debug_map.generate(pygame.Vector2(124, 124), 1)
 
         self.player.hitbox.topleft = pygame.Vector2(64, 64)
 
