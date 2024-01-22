@@ -1,4 +1,5 @@
 import pygame
+import traceback
 
 from scene import SceneManager
 from game import Game
@@ -22,7 +23,12 @@ def main():
     running = True
 
     while running:
-        scene_manager.update(clock)
+        try:
+            scene_manager.update(clock)
+        except Exception as e:
+            running = False
+            pygame.display.message_box("Error", traceback.format_exc(), "error")
+
         
         for event in pygame.event.get():
             scene_manager.events(event)

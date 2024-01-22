@@ -20,23 +20,28 @@ class Game(scene.Scene):
 
     def start(self):
         
-        self.game_map.value_based_tiles.append(1)
+        self.game_map.layers["foreground"].value_based_tiles.append(1)
+        self.game_map.layers["grass"].based_layer = self.game_map.layers["foreground"]
+        self.game_map.layers["flowers"].based_layer = self.game_map.layers["foreground"]
+        self.game_map.layers["grass"].threshold_on_layer = 0.3
+        self.game_map.layers["flowers"].threshold_on_layer = 0.4
         
-        self.game_map.load_tileset("./assets/tilesets/tileset_1.tsj")
+        self.game_map.load_tileset("./assets/tilesets/tileset_0.tsj")
         self.debug_map.load_tileset("./assets/tilesets/tileset_0.tsj")
 
-        self.game_map.add_threshold(0, 5)
-        self.game_map.add_threshold(0.2, 1)
-        self.game_map.add_threshold(0.35, 4)
-        self.game_map.abc = 2
+        self.game_map.layers["foreground"].add_threshold(0, 2)
+        self.game_map.layers["foreground"].add_threshold(0.2, 0)
+        self.game_map.layers["grass"].add_threshold(0, 10)
+        self.game_map.layers["grass"].add_threshold(0.5, 1)
+        self.game_map.layers["flowers"].add_threshold(0, 10)
+        self.game_map.layers["flowers"].add_threshold(0.7, 7)
 
-        self.debug_map.add_threshold(0, 2)
-        self.debug_map.add_threshold(0.2, 0)
-        self.debug_map.add_threshold(0.35, 1)
-        self.debug_map.abc = 2
+        # self.debug_map.layers["foreground"].add_threshold(0, 2)
+        # self.debug_map.layers["foreground"].add_threshold(0.2, 0)
+        # self.debug_map.layers["foreground"].add_threshold(0.35, 1)
 
-        self.game_map.generate(pygame.Vector2(124, 124), 1)
-        self.debug_map.generate(pygame.Vector2(124, 124), 1)
+        self.game_map.generate(pygame.Vector2(62, 62), 1)
+        # self.debug_map.generate(pygame.Vector2(124, 124), 1)
 
         self.player.hitbox.topleft = pygame.Vector2(64, 64)
 
