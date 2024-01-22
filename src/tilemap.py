@@ -50,6 +50,7 @@ class Layer():
         self.thresholds = {0:0, 1:None}
         # self.pixelize_value = 1
         self.based_layer : Layer = None
+        # Sers de seuil en se basant sur les valeurs de self.based_layer
         self.threshold_on_layer = 0.0
         self.value_based_tiles = []
         self.noise_values : numpy.ndarray = None
@@ -64,7 +65,7 @@ class Layer():
             raise ValueError("threshold must be between 0 and 1")
         
         if not (0 <= tile_index <= 10) and isinstance(tile_index, int):
-            raise ValueError("tile_index must be between 0 and 9 and an integer")
+            raise ValueError("tile_index must be between 0 and 10 and an integer")
         
         self.thresholds[threshold] = tile_index
         self.thresholds = {val:self.thresholds[val] for val in sorted(self.thresholds)}
@@ -118,6 +119,7 @@ class Tilemap():
         self.object_layers : dict[str, list] = {}
 
         self.patterns = {}
+        # Liste des tuiles dont on place directement une tuile pleine si la valeur correspond
         self.value_based_tiles = []
         self.abc = 1 # Pas trouvé de nom
 
