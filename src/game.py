@@ -20,23 +20,23 @@ class Game(scene.Scene):
 
     def start(self):
         
-        self.game_map.value_based_tiles.append(1)
+        self.game_map.player = self.player
+        self.debug_map.player = self.player
+        self.game_map.layers["foreground"].value_based_tiles.append(1)
         
         self.game_map.load_tileset("./assets/tilesets/tileset_1.tsj")
         self.debug_map.load_tileset("./assets/tilesets/tileset_0.tsj")
 
-        self.game_map.add_threshold(0, 5)
-        self.game_map.add_threshold(0.2, 1)
-        self.game_map.add_threshold(0.35, 4)
+        self.game_map.layers["foreground"].add_threshold(0, 5)
+        self.game_map.layers["foreground"].add_threshold(0.2, 1)
+        self.game_map.layers["foreground"].add_threshold(0.35, 4)
 
-        self.debug_map.add_threshold(0, 2)
-        self.debug_map.add_threshold(0.2, 0)
-        self.debug_map.add_threshold(0.35, 1)
+        self.debug_map.layers["foreground"].add_threshold(0, 2)
+        self.debug_map.layers["foreground"].add_threshold(0.2, 0)
+        self.debug_map.layers["foreground"].add_threshold(0.35, 1)
 
-        self.game_map.generate((50, 50), 1)
-        self.debug_map.generate((50, 50), 1)
-
-        self.player.hitbox.topleft = pygame.Vector2(64, 64)
+        self.game_map.generate(seed=1)
+        self.debug_map.generate(seed=1)
 
         # Working on
         # player_dest_surface = pygame.Surface([16, 16], pygame.SRCALPHA)
@@ -90,9 +90,6 @@ class Game(scene.Scene):
 
         self.camera.rect.x += (self.player.hitbox.centerx - self.camera.rect.centerx) * 3 * dt
         self.camera.rect.y += (self.player.hitbox.centery - self.camera.rect.centery) * 3 * dt
-
-        self.camera.rect.x = pygame.math.clamp(self.camera.rect.x, 0, self.game_map.size[0] - self.camera.rect.width)
-        self.camera.rect.y = pygame.math.clamp(self.camera.rect.y, 0, self.game_map.size[1] - self.camera.rect.height)
 
         if self.draw_map:
             self.game_map.draw(self.camera)
