@@ -33,8 +33,8 @@ class Game(scene.Scene):
         self.debug_map.add_threshold(0.2, 0)
         self.debug_map.add_threshold(0.35, 1)
 
-        self.game_map.generate(pygame.Vector2(62, 62), 1)
-        self.debug_map.generate(pygame.Vector2(62, 62), 1)
+        self.game_map.generate((50, 50), 1)
+        self.debug_map.generate((50, 50), 1)
 
         self.player.hitbox.topleft = pygame.Vector2(64, 64)
 
@@ -91,8 +91,8 @@ class Game(scene.Scene):
         self.camera.rect.x += (self.player.hitbox.centerx - self.camera.rect.centerx) * 3 * dt
         self.camera.rect.y += (self.player.hitbox.centery - self.camera.rect.centery) * 3 * dt
 
-        self.camera.rect.x = pygame.math.clamp(self.camera.rect.x, 0, self.game_map.size.x - self.camera.rect.width)
-        self.camera.rect.y = pygame.math.clamp(self.camera.rect.y, 0, self.game_map.size.y - self.camera.rect.height)
+        self.camera.rect.x = pygame.math.clamp(self.camera.rect.x, 0, self.game_map.size[0] - self.camera.rect.width)
+        self.camera.rect.y = pygame.math.clamp(self.camera.rect.y, 0, self.game_map.size[1] - self.camera.rect.height)
 
         if self.draw_map:
             self.game_map.draw(self.camera)
