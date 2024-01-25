@@ -9,16 +9,16 @@ import math
 
 from camera import Camera
 
-class Layer():
 
+class Layer:
     def __init__(self):
-        self.tiles : list[tuple[pygame.Surface, pygame.Vector2]] = []
-        self.thresholds = {0:0, 1:None}
-        self.based_layer : Layer = None
+        self.tiles: list[tuple[pygame.Surface, pygame.Vector2]] = []
+        self.thresholds = {0: 0, 1: None}
+        self.based_layer: Layer = None
         self.value_based_tiles = []
-        self.noise_generator : opensimplex.OpenSimplex = None
+        self.noise_generator: opensimplex.OpenSimplex = None
         self.chunks = {}
-    
+
     def add_threshold(self, threshold, tile_index) -> None:
         """
         Add a new threshold for the noise value, tile_index is the tile value if the value is between this threshold and the next.
@@ -27,15 +27,14 @@ class Layer():
 
         if not 0 <= threshold <= 1:
             raise ValueError("threshold must be between 0 and 1")
-        
+
         if not (0 <= tile_index <= 10) and isinstance(tile_index, int):
             raise ValueError("tile_index must be between 0 and 10 and an integer")
-        
+
         self.thresholds[threshold] = tile_index
-        self.thresholds = {val:self.thresholds[val] for val in sorted(self.thresholds)}
+        self.thresholds = {val: self.thresholds[val] for val in sorted(self.thresholds)}
 
-    def build_chunk(self, tilemap : "Tilemap", chunk_pos : tuple[int, int]):
-
+    def build_chunk(self, tilemap: "Tilemap", chunk_pos: tuple[int, int]):
         map_samples = generation.generate_noise1(tilemap, self, chunk_pos)
 
         m_datas = []
@@ -43,83 +42,64 @@ class Layer():
 
         final_map = []
 
-        if tilemap.patterns:
-            # From height float values to integer values representing the type of tile
-            for j in range(tilemap.chunk_size + 2):
-                l = []
-                for i in range(tilemap.chunk_size + 2):
-                    index = 0
-                    for k in range(len(thresholds) - 1):
-                        if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
-                            index = thresholds[k][1]
-                            break
+        # From height float values to integer values representing the type of tile
+        for j in range(tilemap.chunk_size + 2):
+            l = []
+            for i in range(tilemap.chunk_size + 2):
+                index = 0
+                for k in range(len(thresholds) - 1):
+                    if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
+                        index = thresholds[k][1]
+                        break
 
-                    l.append(index)
-                m_datas.append(l)
+                l.append(index)
+            m_datas.append(l)
 
-            # Selecting which tile should be used
-            for j in range(1, tilemap.chunk_size + 1):
-                for i in range(1, tilemap.chunk_size + 1):
-                    if m_datas[j][i] in self.value_based_tiles:
-                        indices = tilemap.get_pattern(
-                            tuple(m_datas[j][i] for _ in range(8)), m_datas[j][i]
-                        )
-                    else:
-                        pattern = (
-                            m_datas[j - 1][i],
-                            m_datas[j - 1][i + 1],
-                            m_datas[j][i + 1],
-                            m_datas[j + 1][i + 1],
-                            m_datas[j + 1][i],
-                            m_datas[j + 1][i - 1],
-                            m_datas[j][i - 1],
-                            m_datas[j - 1][i - 1],
-                        )
-                        indices = tilemap.get_pattern(pattern, m_datas[j][i])
-                    index = random.choice(indices)
-                    tile = (
-                        tilemap.tileset[index],
-                        pygame.Vector2(i - 1, j - 1) * tilemap.tile_size,
+        # Selecting which tile should be used
+        for j in range(1, tilemap.chunk_size + 1):
+            for i in range(1, tilemap.chunk_size + 1):
+                if m_datas[j][i] in self.value_based_tiles:
+                    indices = tilemap.get_pattern(
+                        tuple(m_datas[j][i] for _ in range(8)), m_datas[j][i]
                     )
-                    final_map.append(tile)
-        else:
-            for j in range(tilemap.chunk_size + 2):
-                l = []
-                for i in range(tilemap.chunk_size + 2):
+                else:
+                    pattern = (
+                        m_datas[j - 1][i],
+                        m_datas[j - 1][i + 1],
+                        m_datas[j][i + 1],
+                        m_datas[j + 1][i + 1],
+                        m_datas[j + 1][i],
+                        m_datas[j + 1][i - 1],
+                        m_datas[j][i - 1],
+                        m_datas[j - 1][i - 1],
+                    )
+                    indices = tilemap.get_pattern(pattern, m_datas[j][i])
+                index = random.choice(indices)
+                tile = (
+                    tilemap.tileset[index],
+                    pygame.Vector2(i - 1, j - 1) * tilemap.tile_size,
+                )
+                final_map.append(tile)
 
-                    # if self.based_layer and self.based_layer.noise_values[j, i] < self.threshold_on_layer:
-                    #     index = 10
-                    # else:
-
-                    index = 0
-                    for k in range(len(thresholds) - 1):
-
-                        if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
-                            index = thresholds[k][1]
-                            break
-
-                    tile = tilemap.tileset[index], pygame.Vector2(i-1, j-1) * tilemap.tile_size
-                    final_map.append(tile)
-                m_datas.append(l)
-    
+        # Génération de la surface du chunk, cette partie devrait à priori rester inchangé
         pygame.Vector2(1, 1) * tilemap.chunk_size
-        chunk_surface = pygame.Surface(pygame.Vector2(1, 1) * (tilemap.chunk_size * tilemap.tile_size), pygame.SRCALPHA)
+        chunk_surface = pygame.Surface(
+            pygame.Vector2(1, 1) * (tilemap.chunk_size * tilemap.tile_size),
+            pygame.SRCALPHA,
+        )
         chunk_surface.fblits(final_map)
         self.chunks[chunk_pos] = chunk_surface
 
 
 class Tilemap:
     def __init__(self):
-
         self.chunk_size = 16  # in number of tile
         # The tile size
         self.tile_size = 16
 
         self.tileset: list[pygame.Surface] = []
 
-        self.layers: dict[str, Layer] = {
-            "foreground":Layer()
-        }
+        self.layers: dict[str, Layer] = {"foreground": Layer()}
         self.object_layers: dict[str, list] = {}
 
         self.thresholds = {0: 0, 1: None}
@@ -208,7 +188,9 @@ class Tilemap:
         """
         This method draws the tilemap
         """
-        player_pos = int(self.player.hitbox.x // (self.chunk_size * self.tile_size)), int(self.player.hitbox.y // (self.chunk_size * self.tile_size))
+        player_pos = int(
+            self.player.hitbox.x // (self.chunk_size * self.tile_size)
+        ), int(self.player.hitbox.y // (self.chunk_size * self.tile_size))
 
         for layer in self.layers.values():
             offseted_layer = []
@@ -219,7 +201,15 @@ class Tilemap:
                         layer.build_chunk(self, (i, j))
 
                     offseted_layer.append(
-                        (layer.chunks[(i, j)], round(pygame.Vector2((i, j)) * self.chunk_size * self.tile_size - pygame.Vector2(camera.rect.topleft)))
+                        (
+                            layer.chunks[(i, j)],
+                            round(
+                                pygame.Vector2((i, j))
+                                * self.chunk_size
+                                * self.tile_size
+                                - pygame.Vector2(camera.rect.topleft)
+                            ),
+                        )
                     )
 
             camera.draw(offseted_layer)

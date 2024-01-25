@@ -3,10 +3,9 @@ import math
 
 from camera import Camera
 
+
 class Player:
-
     def __init__(self):
-
         self.hitbox = pygame.FRect(0, 0, 12, 8)
         self.z_height = 24
 
@@ -14,17 +13,21 @@ class Player:
         self.image.fill([237, 25, 158])
 
         self.velocity = pygame.Vector2()
-    
+
         self.speed = 100
         self.easing_timer = 0
 
-        self.keys = {"left":False, "right":False, "up":False, "down":False}
-        self.collision_side = {"left":False, "right":False, "top":False, "bottom":False}
+        self.keys = {"left": False, "right": False, "up": False, "down": False}
+        self.collision_side = {
+            "left": False,
+            "right": False,
+            "top": False,
+            "bottom": False,
+        }
 
         self.jumping = False
 
-    def update(self, dt : float):
-
+    def update(self, dt: float):
         direction = pygame.Vector2()
 
         if self.keys["left"]:
@@ -35,23 +38,26 @@ class Player:
             direction.y -= 1
         if self.keys["down"]:
             direction.y += 1
-        
+
         if direction:
             direction.normalize_ip()
-        
+
         if not direction:
             self.easing_timer = max(self.easing_timer - dt, 0)
         else:
             self.easing_timer = min(self.easing_timer + dt, 0.5)
-        
-        self.velocity = direction * self.speed * dt * (math.sin((self.easing_timer/0.5 * math.pi) / 2))
-    
+
+        self.velocity = (
+            direction
+            * self.speed
+            * dt
+            * (math.sin((self.easing_timer / 0.5 * math.pi) / 2))
+        )
+
     def is_able_to_jump(self):
         return not self.jumping and (self.y_timer <= 0)
 
-
-    def collided(self, colliders : list[pygame.FRect]) -> list[pygame.FRect]:
-
+    def collided(self, colliders: list[pygame.FRect]) -> list[pygame.FRect]:
         collided = []
 
         for collider in colliders:
@@ -59,10 +65,9 @@ class Player:
                 collided.append(collider)
 
         return collided
-    
-    def collisions(self, colliders : list[pygame.FRect]):
-        
-        collision_side = {"left":False, "right":False, "top":False, "bottom":False}
+
+    def collisions(self, colliders: list[pygame.FRect]):
+        collision_side = {"left": False, "right": False, "top": False, "bottom": False}
 
         self.hitbox.x += self.velocity.x
         collided = self.collided(colliders)
@@ -74,7 +79,7 @@ class Player:
             else:
                 self.hitbox.right = collider.left
                 collision_side["right"] = True
-        
+
         self.hitbox.y += self.velocity.y
         collided = self.collided(colliders)
 
@@ -85,11 +90,10 @@ class Player:
             else:
                 self.hitbox.bottom = collider.top
                 collision_side["bottom"] = True
-        
-        self.collision_side = collision_side
-    
-    def post_update(self):
 
+        self.collision_side = collision_side
+
+    def post_update(self):
         if self.collision_side["bottom"]:
             self.velocity.y = 0
             self.y_timer = 0
@@ -98,7 +102,9 @@ class Player:
             self.velocity.y = 0
             self.y_timer = 0
 
-    def draw(self, camera : Camera):
-
-        pos = pygame.Vector2(self.hitbox.centerx - self.image.get_width() / 2, self.hitbox.bottom - self.z_height) - pygame.Vector2(camera.rect.topleft)
+    def draw(self, camera: Camera):
+        pos = pygame.Vector2(
+            self.hitbox.centerx - self.image.get_width() / 2,
+            self.hitbox.bottom - self.z_height,
+        ) - pygame.Vector2(camera.rect.topleft)
         camera.draw([(self.image, round(pos))])
