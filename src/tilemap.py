@@ -128,21 +128,6 @@ class Tilemap:
 
         self.player = None
 
-    def add_threshold(self, threshold, tile_index) -> None:
-        """
-        Add a new threshold for the noise value, tile_index is the tile value if the value is between this threshold and the next.
-        By default, if there is no threshold, it would be the tile index 0. (can be changed)
-        """
-
-        if not 0 <= threshold <= 1:
-            raise ValueError("threshold must be between 0 and 1")
-
-        if not (0 <= tile_index <= 9) and isinstance(tile_index, int):
-            raise ValueError("tile_index must be between 0 and 9 and an integer")
-
-        self.thresholds[threshold] = tile_index
-        self.thresholds = {val: self.thresholds[val] for val in sorted(self.thresholds)}
-
     def _find_similar_pattern(self, pattern: tuple[int]) -> tuple[int]:
         for p in self.patterns:
             s = []
