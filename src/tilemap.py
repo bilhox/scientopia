@@ -4,6 +4,7 @@ import pathlib
 import opensimplex
 import numpy
 import random
+import generation
 import math
 
 from camera import Camera
@@ -13,8 +14,7 @@ class Layer():
     def __init__(self):
         self.tiles : list[tuple[pygame.Surface, pygame.Vector2]] = []
         self.thresholds = {0:0, 1:None}
-        # self.based_layer : Layer = None
-        # self.threshold_on_layer = 0.0
+        self.based_layer : Layer = None
         self.value_based_tiles = []
         self.noise_generator : opensimplex.OpenSimplex = None
         self.chunks = {}
@@ -36,11 +36,7 @@ class Layer():
 
     def build_chunk(self, tilemap : "Tilemap", chunk_pos : tuple[int, int]):
 
-        noise_values = self.noise_generator.noise2array(
-            numpy.array([3.5 * (i + chunk_pos[0] * 16) / tilemap.sample_per_unit for i in range(16 + 2)]),
-            numpy.array([3.5 * (i + chunk_pos[1] * 16) / tilemap.sample_per_unit for i in range(16 + 2)]),
-        )
-        noise_values = numpy.absolute(noise_values)
+        map_samples = generation.generate_noise1(tilemap, self, chunk_pos)
 
         m_datas = []
         thresholds = list(self.thresholds.items())
@@ -54,7 +50,7 @@ class Layer():
                 for i in range(tilemap.chunk_size + 2):
                     index = 0
                     for k in range(len(thresholds) - 1):
-                        if thresholds[k][0] <= noise_values[j, i] <= thresholds[k + 1][0]:
+                        if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
                             index = thresholds[k][1]
                             break
 
@@ -98,7 +94,7 @@ class Layer():
                     index = 0
                     for k in range(len(thresholds) - 1):
 
-                        if thresholds[k][0] <= noise_values[j, i] <= thresholds[k + 1][0]:
+                        if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
                             index = thresholds[k][1]
                             break
 
@@ -130,7 +126,6 @@ class Tilemap:
         self.patterns = {}
         self.value_based_tiles = []
 
-        self.sample_per_unit = 100
         self.player = None
 
     def add_threshold(self, threshold, tile_index) -> None:
