@@ -1,16 +1,54 @@
 import pygame
 import math
+import pathlib
+import gif_pygame
 
 from camera import Camera
+
+
+SIDES = {(1, 0):"east",
+         (1, -1):"northeast",
+         (0, -1):"north",
+         (-1, -1):"northwest",
+         (-1, 0):"west",
+         (-1, 1):"southwest",
+         (0, 1):"south",
+         (1, 1):"southeast",
+         (0, 0):"None"
+         }
+
+def load_player_assets(path : str):
+
+    xpath = pathlib.Path(path)
+    
+    ressources = {}
+
+    for p in xpath.iterdir():
+        if p.name == "animations":
+            anims = {}
+            for anim in p.iterdir():
+                animation = {}
+                for side in anim.iterdir():
+                    gif = gif_pygame.load(side.as_posix())
+                    animation[side.stem] = gif
+                anims[anim.name] = animation
+            ressources["animations"] = anims
+        elif p.name == "textures":
+            texs = {}
+            for tex in p.iterdir():
+                texture = {}
+                for side in tex.iterdir():
+                    texture[side.stem] = pygame.image.load(side.as_posix()).convert_alpha()
+                texs[tex.name] = texture
+            ressources["textures"] = texs
+
+    return ressources
 
 
 class Player:
     def __init__(self):
         self.hitbox = pygame.FRect(0, 0, 12, 8)
         self.z_height = 24
-
-        self.image = pygame.Surface([16, self.z_height])
-        self.image.fill([237, 25, 158])
 
         self.velocity = pygame.Vector2()
 
@@ -27,6 +65,11 @@ class Player:
 
         self.jumping = False
 
+        self.ressources = load_player_assets("assets/player/")
+        self.image = self.ressources["textures"]["idle"]["south"]
+        self.animation = None
+        self.direction = "south"
+
     def update(self, dt: float):
         direction = pygame.Vector2()
 
@@ -38,6 +81,15 @@ class Player:
             direction.y -= 1
         if self.keys["down"]:
             direction.y += 1
+
+        side = SIDES[tuple(direction)]
+
+        if side == "None":
+            self.animation = None
+            self.image = self.ressources["textures"]["idle"][self.direction]
+        else:
+            self.direction = side
+            self.animation = self.ressources["animations"]["walking"][self.direction]
 
         if direction:
             direction.normalize_ip()
@@ -107,4 +159,7 @@ class Player:
             self.hitbox.centerx - self.image.get_width() / 2,
             self.hitbox.bottom - self.z_height,
         ) - pygame.Vector2(camera.rect.topleft)
-        camera.draw([(self.image, round(pos))])
+
+        image = self.image if not self.animation else self.animation.blit_ready()
+
+        camera.draw([(image, round(pos))])
