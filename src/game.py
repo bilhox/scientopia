@@ -1,9 +1,11 @@
 import pygame
 import scene
 
-from tilemap import Tilemap
+from tilemap import Tilemap,Layer
 from player import Player
 from camera import Camera
+from generation import *
+
 
 
 class Game(scene.Scene):
@@ -22,11 +24,12 @@ class Game(scene.Scene):
 
         self.game_map.load_tileset("./assets/tilesets/tileset_1.tsj")
 
-        self.game_map.layers["foreground"].add_threshold(0, 5)
-        self.game_map.layers["foreground"].add_threshold(0.2, 1)
-        self.game_map.layers["foreground"].add_threshold(0.35, 4)
-
         self.game_map.generate(seed=1)
+
+        self.game_map.layers["flowers"] = Layer()
+        self.game_map.layers["flowers"].generation_type = False
+        self.game_map.layers["flowers"].generator_function = generate2
+
 
         # Working on
         # player_dest_surface = pygame.Surface([16, 16], pygame.SRCALPHA)
