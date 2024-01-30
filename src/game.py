@@ -21,13 +21,14 @@ class Game(scene.Scene):
     def start(self):
         self.game_map.player = self.player
         self.game_map.layers["foreground"].value_based_tiles.append(1)
+        self.game_map.layers["foreground"].generation_type = "PATTERN MATCHING"
 
         self.game_map.load_tileset("./assets/tilesets/tileset_1.tsj")
 
         self.game_map.generate(seed=1)
 
         self.game_map.layers["flowers"] = Layer()
-        self.game_map.layers["flowers"].generation_type = False
+        self.game_map.layers["flowers"].generation_type = "RANDOM"
         self.game_map.layers["flowers"].generator_function = generate2
 
 

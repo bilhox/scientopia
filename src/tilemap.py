@@ -18,7 +18,7 @@ class Layer:
         self.noise_generator: opensimplex.OpenSimplex = None
         self.chunks = {}
         self.generator_function = generation.generate_noise1
-        self.generation_type = True
+        self.generation_type = ""
 
     def build_chunk(self, tilemap: "Tilemap", chunk_pos: tuple[int, int]):
         if(self.generator_function == None):
@@ -31,14 +31,14 @@ class Layer:
         # Selecting which tile should be used
         for j in range(1, tilemap.chunk_size + 1):
             for i in range(1, tilemap.chunk_size + 1):
-                if self.generation_type:
+                if self.generation_type == "PATTERN MATCHING":
                     index = self.pattern_matching(m_datas, tilemap, i, j)
                     tile = (
                         tilemap.tileset[index],
                         pygame.Vector2(i - 1, j - 1) * tilemap.tile_size,
                     )
                     final_map.append(tile)
-                elif(m_datas[j][i] != 0):
+                elif(self.generation_type == "RANDOM" and m_datas[j][i] != 0):
                     tile = (
                         tilemap.tileset[m_datas[j][i]],
                         pygame.Vector2(i - 1, j - 1) * tilemap.tile_size,
