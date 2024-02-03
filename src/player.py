@@ -65,7 +65,7 @@ class Player:
 
         self.jumping = False
 
-        self.ressources = load_player_assets("assets/player/")
+        self.ressources = load_player_assets("./assets/player/")
         self.image = self.ressources["textures"]["idle"]["south"]
         self.animation = None
         self.direction = "south"
