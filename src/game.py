@@ -1,5 +1,7 @@
 import pygame
 import scene
+import gif_pygame
+import pathfinding
 
 from tilemap import Tilemap
 from player import Player
@@ -29,41 +31,46 @@ class Game(scene.Scene):
         self.game_map.generate(seed=1)
 
         # Working on
-        # player_dest_surface = pygame.Surface([16, 16], pygame.SRCALPHA)
-        # pygame.draw.circle(player_dest_surface, [255, 255, 255, 128], [8, 8], 4)
+        self.player_dest_surface = pygame.image.load("./assets/target_cell.png").convert_alpha()
+        self.player_dest_arrow = gif_pygame.load("./assets/target_arrow.gif")
+        gif_pygame.transform.convert_alpha(self.player_dest_arrow)
+        self.player_dest = pygame.Vector2(0, 0)
 
-        # player_dest = pygame.Vector2(0, 0)
-
+        self.path_block = pygame.Surface([16, 16], pygame.SRCALPHA)
+        self.path_block.fill((0, 0, 200, 64))
         # pygame.mouse.set_visible(False)
 
     def events(self, event: pygame.Event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                self.player.keys["right"] = True
-            elif event.key == pygame.K_LEFT:
-                self.player.keys["left"] = True
-            elif event.key == pygame.K_UP:
-                self.player.keys["up"] = True
-            elif event.key == pygame.K_DOWN:
-                self.player.keys["down"] = True
+        # if event.type == pygame.KEYDOWN:
+        #     if event.key == pygame.K_RIGHT:
+        #         self.player.keys["right"] = True
+        #     elif event.key == pygame.K_LEFT:
+        #         self.player.keys["left"] = True
+        #     elif event.key == pygame.K_UP:
+        #         self.player.keys["up"] = True
+        #     elif event.key == pygame.K_DOWN:
+        #         self.player.keys["down"] = True
 
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                self.player.keys["right"] = False
-            elif event.key == pygame.K_LEFT:
-                self.player.keys["left"] = False
-            elif event.key == pygame.K_UP:
-                self.player.keys["up"] = False
-            elif event.key == pygame.K_DOWN:
-                self.player.keys["down"] = False
+        # elif event.type == pygame.KEYUP:
+        #     if event.key == pygame.K_RIGHT:
+        #         self.player.keys["right"] = False
+        #     elif event.key == pygame.K_LEFT:
+        #         self.player.keys["left"] = False
+        #     elif event.key == pygame.K_UP:
+        #         self.player.keys["up"] = False
+        #     elif event.key == pygame.K_DOWN:
+        #         self.player.keys["down"] = False
 
-        # elif event.type == pygame.MOUSEBUTTONDOWN:
-        #     mouse_pos = pygame.Vector2(event.pos)
-        #     # 2 c'est le coefficient de zoom de la caméra, 16 la taille des tuiles
-        #     mouse_pos /= 2
-        #     mouse_pos += pygame.Vector2(camera.rect.topleft)
-        #     mouse_pos //= 16
-        #     player_dest = mouse_pos
+        if event.type == pygame.MOUSEBUTTONDOWN and self.player.reached_destination:
+            mouse_pos = pygame.Vector2(event.pos)
+            # 2 c'est le coefficient de zoom de la caméra, 16 la taille des tuiles
+            mouse_pos /= 2
+            mouse_pos += pygame.Vector2(self.camera.rect.topleft)
+            mouse_pos //= 16
+            self.player_dest = mouse_pos
+            self.player.path = pathfinding.find_way(tuple(self.player.cell_position), tuple(mouse_pos), [])
+            self.player.distance_remaining = self.player.path.distance
+            self.player.reached_destination = False
 
     def update(self, clock: pygame.Clock):
         dt = clock.tick() / 1000
@@ -72,7 +79,6 @@ class Game(scene.Scene):
         self.camera.clear()
 
         self.player.update(dt)
-        self.player.collisions([])
 
         self.camera.rect.x += (
             (self.player.hitbox.centerx - self.camera.rect.centerx) * 3 * dt
@@ -82,7 +88,9 @@ class Game(scene.Scene):
         )
 
         self.game_map.draw(self.camera)
-        # camera.draw([(player_dest_surface, player_dest * 16 - pygame.Vector2(camera.rect.topleft))])
+        if not self.player.reached_destination:
+            self.camera.draw([(self.player_dest_surface, self.player_dest * 16 - pygame.Vector2(self.camera.rect.topleft))])
+            self.camera.draw([(self.player_dest_arrow.blit_ready(), self.player_dest * 16 - pygame.Vector2(self.camera.rect.topleft) - pygame.Vector2(0, 8))])
         self.player.draw(self.camera)
 
         self.camera.display_on_screen(self.screen)
