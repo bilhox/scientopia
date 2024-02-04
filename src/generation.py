@@ -65,10 +65,11 @@ def generate2(tilemap, layer, chunk_pos):
         l = []
         for i in range(tilemap.chunk_size + 2):
             index = 0
-            for k in range(len(thresholds) - 1):
-                if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0] and map_samples_layer_one[j, i] > list(THRESHOLD_LAYER_ONE.items())[2][0]:
-                    index = thresholds[k][1]
-                    break
+            if map_samples_layer_one[j, i] > 0.2:
+                for k in range(len(thresholds) - 1):
+                    if thresholds[k][0] <= map_samples[j, i] <= thresholds[k + 1][0]:
+                        index = thresholds[k][1]
+                        break
 
             l.append(index)
         m_datas.append(l)

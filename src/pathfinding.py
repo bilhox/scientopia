@@ -1,6 +1,9 @@
 import bisect
 import pygame
 
+if not pygame.get_init():
+    pygame.init()
+
 class Cell():
     def __init__(self, pos : tuple[int, int]):
         self.f_cost : int = 0
@@ -26,7 +29,7 @@ def get_distance(a_cell : Cell, b_cell : Cell):
     else:
         return 14 * dif_pos[1] + 10 * (dif_pos[0] - dif_pos[1])
 
-def cell_neighbours(cell : Cell):
+def cell_neighbours(cell : Cell, player_pos : tuple):
     neighbours = []
     for j in range(-1, 2):
         for i in range(-1, 2):
@@ -34,11 +37,17 @@ def cell_neighbours(cell : Cell):
                 continue
             check_x = cell.pos[0] + i
             check_y = cell.pos[1] + j
+            if not (player_pos[0] - 18 <= check_x < player_pos[0] + 18) or not (player_pos[1] - 10 <= check_y < player_pos[1] + 10):
+                continue
             ng = Cell((check_x, check_y))
             neighbours.append(ng)
     return neighbours
 
 def find_way(start_pos, end_pos, blocks_pos : list[tuple]):
+
+    if not (start_pos[0] - 18 <= end_pos[0] < start_pos[0] + 18) or not (start_pos[1] - 10 <= end_pos[1] < start_pos[1] + 10):
+        return PathData()
+
     opened_cell = []
     opened_cell_pos = []
     closed_cell_pos : list[tuple] = []
@@ -51,11 +60,17 @@ def find_way(start_pos, end_pos, blocks_pos : list[tuple]):
     opened_cell.append(start_node)
     opened_cell_pos.append(start_node.pos)
 
+    timer = 0
+    clock = pygame.Clock()
+
     while not found:
+        timer += clock.tick()
+        if timer > 50:
+            return PathData()
         try:
             current = opened_cell[0]
         except:
-            return []
+            return PathData()
         opened_cell.remove(current)
         opened_cell_pos.remove(current.pos)
         closed_cell_pos.append(current.pos)
@@ -63,7 +78,7 @@ def find_way(start_pos, end_pos, blocks_pos : list[tuple]):
             found = True
             return retrace_path(current, start_node)
 
-        for neighbour in cell_neighbours(current):
+        for neighbour in cell_neighbours(current, start_pos):
             if neighbour.pos in blocks_pos or neighbour.pos in closed_cell_pos:
                 continue
             new_cost = current.g_cost + get_distance(current, neighbour)

@@ -24,6 +24,7 @@ class Game(scene.Scene):
         self.game_map.player = self.player
         self.game_map.layers["foreground"].value_based_tiles.append(1)
         self.game_map.layers["foreground"].generation_type = "PATTERN MATCHING"
+        self.game_map.layers["foreground"].obstacle_tiles.append(5)
 
         self.game_map.load_tileset("./assets/tilesets/tileset_1.tsj")
 
@@ -45,25 +46,6 @@ class Game(scene.Scene):
         # pygame.mouse.set_visible(False)
 
     def events(self, event: pygame.Event):
-        # if event.type == pygame.KEYDOWN:
-        #     if event.key == pygame.K_RIGHT:
-        #         self.player.keys["right"] = True
-        #     elif event.key == pygame.K_LEFT:
-        #         self.player.keys["left"] = True
-        #     elif event.key == pygame.K_UP:
-        #         self.player.keys["up"] = True
-        #     elif event.key == pygame.K_DOWN:
-        #         self.player.keys["down"] = True
-
-        # elif event.type == pygame.KEYUP:
-        #     if event.key == pygame.K_RIGHT:
-        #         self.player.keys["right"] = False
-        #     elif event.key == pygame.K_LEFT:
-        #         self.player.keys["left"] = False
-        #     elif event.key == pygame.K_UP:
-        #         self.player.keys["up"] = False
-        #     elif event.key == pygame.K_DOWN:
-        #         self.player.keys["down"] = False
 
         if event.type == pygame.MOUSEBUTTONDOWN and self.player.reached_destination:
             mouse_pos = pygame.Vector2(event.pos)
@@ -72,7 +54,7 @@ class Game(scene.Scene):
             mouse_pos += pygame.Vector2(self.camera.rect.topleft)
             mouse_pos //= 16
             self.player_dest = mouse_pos
-            self.player.path = pathfinding.find_way(tuple(self.player.cell_position), tuple(mouse_pos), [])
+            self.player.path = pathfinding.find_way(tuple(self.player.cell_position), tuple(mouse_pos), self.game_map.get_obstacles())
             self.player.distance_remaining = self.player.path.distance
             self.player.reached_destination = False
 

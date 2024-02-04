@@ -15,6 +15,7 @@ class Layer:
         self.tiles: list[tuple[pygame.Surface, pygame.Vector2]] = []
         self.based_layer: Layer = None
         self.value_based_tiles = []
+        self.obstacle_tiles = []
         self.noise_generator: opensimplex.OpenSimplex = None
         self.chunks = {}
         self.generator_function = generation.generate_noise1
@@ -27,12 +28,15 @@ class Layer:
         m_datas = self.generator_function(tilemap, self, chunk_pos)
 
         final_map = []
+        obstacles = []
 
         # Selecting which tile should be used
         for j in range(1, tilemap.chunk_size + 1):
             for i in range(1, tilemap.chunk_size + 1):
+                if m_datas[j][i] in self.obstacle_tiles:
+                    obstacles.append((chunk_pos[0] * tilemap.chunk_size + i, chunk_pos[1] * tilemap.chunk_size + j))
                 if self.generation_type == "PATTERN MATCHING":
-                    index = self.pattern_matching(m_datas, tilemap, i, j)
+                    index = self.pattern_matching(m_datas, tilemap, (i, j))
                     tile = (
                         tilemap.tileset[index],
                         pygame.Vector2(i - 1, j - 1) * tilemap.tile_size,
@@ -52,9 +56,10 @@ class Layer:
             pygame.SRCALPHA,
         )
         chunk_surface.fblits(final_map)
-        self.chunks[chunk_pos] = chunk_surface
+        self.chunks[chunk_pos] = {"surface":chunk_surface, "obstacles":obstacles}
 
-    def pattern_matching(self,m_datas,tilemap,i,j):
+    def pattern_matching(self, m_datas, tilemap, pos):
+        i, j = pos
         if m_datas[j][i] in self.value_based_tiles:
             indices = tilemap.get_pattern(
                 tuple(m_datas[j][i] for _ in range(8)), m_datas[j][i]
@@ -165,6 +170,21 @@ class Tilemap:
         for j in range(-radius, radius):
             for i in range(-radius, radius):
                 self.layers["foreground"].build_chunk(self, (i, j))
+    
+    def get_obstacles(self):
+
+        player_pos = int(
+            self.player.hitbox.x // (self.chunk_size * self.tile_size)
+        ), int(self.player.hitbox.y // (self.chunk_size * self.tile_size))
+
+        obstacles = []
+        for layer in self.layers.values():
+            for j in range(player_pos[1] - 2, player_pos[1] + 2):
+                    for i in range(player_pos[0] - 3, player_pos[0] + 3):
+                        if (i, j) in layer.chunks:
+                            obstacles.extend(layer.chunks[(i, j)]["obstacles"])
+        
+        return obstacles
 
     def draw(self, camera: Camera) -> None:
         """
@@ -184,7 +204,7 @@ class Tilemap:
 
                     offseted_layer.append(
                         (
-                            layer.chunks[(i, j)],
+                            layer.chunks[(i, j)]["surface"],
                             round(
                                 pygame.Vector2((i, j))
                                 * self.chunk_size

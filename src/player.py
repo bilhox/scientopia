@@ -51,7 +51,7 @@ class Player:
         self.hitbox = pygame.FRect(0, 0, 20, 28)
         # self.z_height = 24
         self.cell_offset = pygame.Vector2(8, 10)
-        self.set_cell_position([-2, 3])
+        self.set_cell_position([-20, 0])
 
         self.speed = 100
         self.jumping = False
@@ -102,16 +102,6 @@ class Player:
             offset = (self.current_cell.distance - self.distance_remaining)
             cell_direction = pygame.Vector2(self.current_cell.direction).normalize()
             self.hitbox.midbottom = pygame.Vector2(self.cell_position) * 16 + self.cell_offset + cell_direction * offset
-        # for path_block
-
-        # if self.keys["left"]:
-        #     direction.x -= 1
-        # if self.keys["right"]:
-        #     direction.x += 1
-        # if self.keys["up"]:
-        #     direction.y -= 1
-        # if self.keys["down"]:
-        #     direction.y += 1
 
         side = SIDES[tuple(direction)]
 
