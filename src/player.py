@@ -49,7 +49,6 @@ def load_player_assets(path : str):
 class Player:
     def __init__(self):
         self.hitbox = pygame.FRect(0, 0, 20, 28)
-        # self.z_height = 24
         self.cell_offset = pygame.Vector2(8, 10)
         self.set_cell_position([-20, 0])
 
