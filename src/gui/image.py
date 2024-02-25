@@ -3,10 +3,9 @@ import pygame
 from gui.element import UIContainer, UIElement
 from gui.manager import UIManager
 
-class UIImageVisualizer(UIElement):
+class UIImage(UIElement):
     def __init__(self, rect: pygame.Rect, manager: UIManager, container: UIContainer = None) -> None:
         super().__init__(rect, manager, container)
-
         self.images = {}
     
     def set_image(self, id : str):

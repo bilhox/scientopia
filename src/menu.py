@@ -15,8 +15,8 @@ class Inventory(UIContainer):
 
         self.set_hidden(True)
         self.set_align(["centerx", "centery"])
-        self.animations["on_show"] = AlphaAnimation(self, .5, 0, 255)
-        self.animations["on_hide"] = AlphaAnimation(self, .5, 255, 0)
+        self.add_animation(AlphaAnimation(self, .5, 0, 255), "on_show")
+        self.add_animation(AlphaAnimation(self, .5, 255, 0), "on_hide")
 
         self.ui_slot_panel = UIPanel(pygame.Rect([0, 0], [camera_size[1], camera_size[1]]), manager, self)
         self.ui_slot_panel.set_align(["right"])
@@ -33,7 +33,7 @@ class Inventory(UIContainer):
         self.ui_player = UIPanel(pygame.Rect([0, 0], [camera_size[0] - camera_size[1], camera_size[1]]), manager, self)
         self.ui_player.set_background_color([0, 0, 0, 0])
 
-        self.ui_player_visualizer = UIImageVisualizer(pygame.Rect(0, 50, 250, 500), manager, self.ui_player)
+        self.ui_player_visualizer = UIImage(pygame.Rect(0, 50, 250, 500), manager, self.ui_player)
         self.ui_player_visualizer.set_align(["centerx"])
 
         self.sides = ["south", "southeast", "east", "northeast", "north", "northwest", "west", "southwest"]

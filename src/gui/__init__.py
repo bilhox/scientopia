@@ -6,4 +6,4 @@ from gui.manager import *
 from gui.panel import *
 from gui.animation import *
 from gui.scrollbar import *
-from gui.image_visualizer import *
+from gui.image import *

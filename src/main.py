@@ -14,7 +14,7 @@ def main():
     screen_size = desktop_size * 2 / 3
 
     pygame.display.set_mode(
-        [screen_size.x, screen_size.y], vsync=1, flags=pygame.RESIZABLE + pygame.SCALED
+        [screen_size.x, screen_size.y], vsync=1, flags=pygame.SCALED
     )
     clock = pygame.Clock()
 

@@ -3,6 +3,7 @@ from pygame.surface import Surface as Surface
 
 from gui.manager import UIManager
 from gui.constants import UI_ANIMATIONENDED
+from gui.animation import Animation
 
 class UIElement():
 
@@ -30,13 +31,17 @@ class UIElement():
             "on_show":None
         }
     
+    def add_animation(self, animation : Animation, name : str):
+        animation.name = name
+        self.animations[name] = animation
+    
     def update(self, dt : float):
         if not self.current_animation:
             return
         self.current_animation.update(dt)
         if self.current_animation.finished:
             self.current_animation.reset()
-            pygame.event.post(pygame.Event(UI_ANIMATIONENDED, {"ui_element":self}))
+            pygame.event.post(pygame.Event(UI_ANIMATIONENDED, {"ui_element":self, "animation_name":self.current_animation.name}))
             if self.current_animation.name == "on_hide":
                 self.hidden = True
             self.current_animation = None

@@ -1,5 +1,5 @@
 import pygame
-from gui.element import UIContainer, UIElement
+from gui.element import UIContainer
 from gui.button import UIButton
 from gui.manager import UIManager
 from gui.constants import *
@@ -25,7 +25,7 @@ class UIScrollbar(UIContainer):
 
         if event.type == UI_BUTTONPRESSED:
             if event.ui_element == self._bar:
-                m_pos = self.get_inner_position_from(pygame.Vector2(pygame.mouse.get_pos())) * POSITION_SCALE_FACTOR
+                m_pos = self.get_inner_position_from(pygame.Vector2(pygame.mouse.get_pos()))
                 self._offset_bar = m_pos[1] - self._bar.get_position()[1]
                 self._pressed = True
         elif event.type == UI_BUTTONRELEASED:
@@ -34,7 +34,7 @@ class UIScrollbar(UIContainer):
         
         elif event.type == pygame.MOUSEMOTION:
             if self._pressed:
-                m_pos = self.get_inner_position_from(pygame.Vector2(event.pos)) * POSITION_SCALE_FACTOR
+                m_pos = self.get_inner_position_from(pygame.Vector2(event.pos))
                 y_pos = pygame.math.clamp(m_pos[1] - self._offset_bar, 0, self.get_size()[1] - self._bar.get_size()[1])
                 self._bar.set_position([0, y_pos])
 

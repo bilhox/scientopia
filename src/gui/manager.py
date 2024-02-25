@@ -1,34 +1,24 @@
 import pygame
+from gui.constants import UI_RESSOURCE_COLOR, UI_RESSOURCE_FONT, UI_RESSOURCE_IMAGE, UI_RESSOURCE_SFX
 
 if not pygame.get_init():
     pygame.init()
 
 UI_DEFAULT_RESSOURCES = {
-    "button_images":{
-        "nothing":(100, 100, 100),
-        "on_hover":(170, 170, 170),
-        "on_click":(70, 70, 70)
-    },
     "fonts":{
         "regular":pygame.Font('assets/fonts/FiraCode-Regular.ttf')
     },
     "colors":{
         "default":(20, 20, 20, 230),
         "default_border":(150, 150, 150),
-        "scrollbar_bg":(120, 120, 120, 128)
-    }
+        "scrollbar_bg":(120, 120, 120, 128),
+        "button_nothing":(100, 100, 100),
+        "button_on_hover":(170, 170, 170),
+        "button_on_click":(70, 70, 70)
+    },
+    "images":{},
+    "sfx":{}
 }
-
-# def load_default_ressources() -> dict:
-#     ressources = {}
-
-#     for x_property_name, x_property_datas in UI_DEFAULT_RESSOURCES.items():
-#         x_prop_datas = {}
-#         for name, value in x_property_datas:
-#             if(value.startswith("color")):
-#                 color = eval(value.removeprefix("color"))
-                
-
 
 class UIManager():
     def __init__(self, size : list) -> None:
@@ -50,6 +40,21 @@ class UIManager():
         self._size = size
         for el in self.ui_elements:
             el._update_position()
+    
+    def add_ressource(self, ressource_type, *args):
+        
+        if ressource_type == UI_RESSOURCE_FONT:
+            font = pygame.Font(args[0], args[1])
+            self.ressources["fonts"][args[2]] = font
+        elif ressource_type == UI_RESSOURCE_COLOR:
+            color = args[0]
+            self.ressources["colors"][args[1]] = color
+        elif ressource_type == UI_RESSOURCE_IMAGE:
+            image = pygame.image.load(args[0]).convert_alpha()
+            self.ressources["images"][args[1]] = image
+        elif ressource_type == UI_RESSOURCE_SFX:
+            sfx = pygame.mixer.Sound(args[0])
+            self.ressources["sfx"][args[1]] = sfx
     
     def prepare_drawing(self) -> list[pygame.Surface, tuple]:
 

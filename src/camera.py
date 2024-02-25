@@ -15,7 +15,7 @@ class Camera:
         if on_screen:
             self.screen.blits(surfs)
         else:
-            self.display_surface.fblits(surfs)
+            self.display_surface.blits(surfs)
 
     def display_on_screen(self):
         self.screen.blit(pygame.transform.scale_by(self.display_surface, 2), self.position)
